@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-webserver
+  template:
+    metadata:
+      labels:
+        app: go-webserver
+    spec:
+      containers:
+      - name: go-webserver
+        image: image-registry.openshift-image-registry.svc:5000/go-web-test/go-webserver 
+        ports:
+        - containerPort: 8080
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-webserver
+spec:
+  selector:
+    app: go-webserver
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: go-webserver
+spec:
+  to:
+    kind: Service
+    name: go-webserver
+  tls:
+    termination: edge
