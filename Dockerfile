@@ -5,7 +5,7 @@ COPY main.go ./
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o go-webserver main.go
 
 # Final stage
-FROM ubi8-minimal
+FROM ubi8-minimal:latest
 RUN apk add --no-cache ca-certificates
 WORKDIR /app
 COPY --from=builder /app/go-webserver .
